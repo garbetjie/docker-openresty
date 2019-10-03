@@ -3,22 +3,24 @@ ARG OPENRESTY_IMAGE="openresty/openresty"
 ARG OPENRESTY_TAG="1.15.8.2-alpine"
 
 # Set the source image.
-FROM ${OPENREST_IMAGE}:${OPENRESTY_TAG}
+FROM ${OPENRESTY_IMAGE}:${OPENRESTY_TAG}
+
+# Add additional packages.
+RUN apk add --no-cache gettext
 
 # Copy in the configuration files.
+RUN find /usr/local/openresty/nginx/conf -name '*.default' -delete
 COPY fs /
 
 # Set common environment variables.
-ENV WEBROOT="/app/public" \
+ENV MAX_REQUEST_SIZE="16M" \
 	TIMEOUT=600 \
-	MAX_REQUEST_SIZE="16M"
+	FALLBACK="@fastcgi" \
+    ROOT="/app/public"
 
 # Set FastCGI environment variables.
-ENV FPM_HOST="127.0.0.1" \
-	FPM_PORT=9000 \
-	FPM_STATUS_ENABLED="true" \
-	FPM_STATUS_PATH="/_/status"
-	FPM_WEBROOT="${WEBROOT}"
+ENV FCGI_SERVERS="127.0.0.1:9000" \
+	FCGI_ROOT="${ROOT}"
 
 WORKDIR "/app"
-ENTRYPOINT ["/usr/local/openresty/nginx/sbin/nginx", "-c", "/etc/nginx/nginx.conf"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
