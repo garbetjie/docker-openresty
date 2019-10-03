@@ -21,6 +21,7 @@ steps:
 
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
+    waitFor: ['-']
     id: pull-fat-proxy
     args: ['-c', 'docker pull $_DOCKER_HUB_REPO/openresty:1.15-proxy-fat || exit 0']
 
