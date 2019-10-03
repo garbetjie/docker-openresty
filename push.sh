@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 project="$1"
-hub_repo_name="$2"
+hub_user="$2"
 
 # Ensure we have a project id.
 if [[ "$#" -lt 2 ]]; then
-    printf "Usage: $0 \e[4mGCP_PROJECT\e[0m \e[4mHUB_REPO_NAME\e[0m\n"
+    printf "Usage: $0 \e[4mGCP_PROJECT\e[0m \e[4mHUB_USER\e[0m\n"
     exit 1
 fi
 
@@ -16,5 +16,5 @@ cd "$(cd "$(dirname "$0")" && pwd)"
 printf "\n\e[38;5;116mSubmitting build.\e[0m\n"
 gcloud builds submit \
     --project "$project" \
-    --substitutions "_DOCKER_HUB_REPO=${hub_repo_name}" \
+    --substitutions "_DOCKER_HUB_REPO=${hub_user}" \
     --config ./cloudbuild.yaml .
