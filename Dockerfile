@@ -1,9 +1,8 @@
-# Determine base image.
-ARG OPENRESTY_IMAGE="openresty/openresty"
+# Determine base tag.
 ARG OPENRESTY_TAG="1.15.8.2-alpine"
 
 # Set the source image.
-FROM ${OPENRESTY_IMAGE}:${OPENRESTY_TAG}
+FROM openresty/openresty:${OPENRESTY_TAG}
 
 # Add additional packages.
 RUN apk add --no-cache gettext

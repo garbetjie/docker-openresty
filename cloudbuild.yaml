@@ -1,0 +1,64 @@
+---
+# Allow builds to run for up to 30 minutes.
+timeout: 1800s
+
+steps:
+
+# Build slim proxy.
+
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    id: pull-proxy
+    args: ['-c', 'docker pull $_DOCKER_HUB_REPO/openresty:1.15-proxy || exit 0']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    waitFor: [pull-proxy]
+    id: build-proxy
+    args: ['build', '-t', '$_DOCKER_HUB_REPO/openresty:1.15-proxy', '--build-arg', 'OPENRESTY_TAG=1.15.8.2-alpine', '.']
+
+
+# Build fat proxy.
+
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    id: pull-fat-proxy
+    args: ['-c', 'docker pull $_DOCKER_HUB_REPO/openresty:1.15-proxy-fat || exit 0']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    waitFor: [pull-fat-proxy]
+    id: build-fat-proxy
+    args: ['build', '-t', '$_DOCKER_HUB_REPO/openresty:1.15-proxy-fat', '--build-arg', 'OPENRESTY_TAG=1.15.8.2-alpine-fat', '.']
+
+# Login and push images.
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: decrypt-hub-username
+    waitFor: ['-']
+    args:
+      - 'kms'
+      - 'decrypt'
+      - '--location=global'
+      - '--keyring=docker'
+      - '--key=hub'
+      - '--ciphertext-file=.cloudbuild/docker-hub-username.enc'
+      - '--plaintext-file=docker-hub-username.txt'
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: decrypt-hub-password
+    waitFor: ['-']
+    args:
+      - 'kms'
+      - 'decrypt'
+      - '--location=global'
+      - '--keyring=docker'
+      - '--key=hub'
+      - '--ciphertext-file=.cloudbuild/docker-hub-password.enc'
+      - '--plaintext-file=docker-hub-password.txt'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    waitFor: [build-fat-proxy, build-proxy, decrypt-hub-username, decrypt-hub-password]
+    entrypoint: 'bash'
+    args: ['-c', 'cat docker-hub-password.txt | docker login --username=$$(cat docker-hub-username.txt) --password-stdin']
+
+images:
+  - '$_DOCKER_HUB_REPO/openresty'
