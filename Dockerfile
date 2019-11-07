@@ -12,10 +12,11 @@ RUN find /usr/local/openresty/nginx/conf -name '*.default' -delete
 COPY fs /
 
 # Set common environment variables.
-ENV MAX_REQUEST_SIZE="16M" \
-    TIMEOUT=600 \
-    FALLBACK="@fastcgi" \
-    ROOT="/app/public"
+ENV FALLBACK="@fastcgi" \
+    GZIP_TYPES="application/ecmascript application/javascript application/json application/xhtml+xml application/xml text/css text/ecmascript text/javascript text/plain text/xml" \
+    MAX_REQUEST_SIZE="16M" \
+    ROOT="/app/public" \
+    TIMEOUT=600
 
 # Set FastCGI environment variables.
 ENV FCGI_SERVERS="127.0.0.1:9000" \
