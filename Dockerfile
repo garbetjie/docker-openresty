@@ -13,13 +13,13 @@ COPY fs /
 
 # Set common environment variables.
 ENV MAX_REQUEST_SIZE="16M" \
-	TIMEOUT=600 \
-	FALLBACK="@fastcgi" \
+    TIMEOUT=600 \
+    FALLBACK="@fastcgi" \
     ROOT="/app/public"
 
 # Set FastCGI environment variables.
 ENV FCGI_SERVERS="127.0.0.1:9000" \
-	FCGI_ROOT="${ROOT}"
+    FCGI_ROOT="${ROOT}"
 
 WORKDIR "/app"
 ENTRYPOINT ["/docker-entrypoint.sh"]
